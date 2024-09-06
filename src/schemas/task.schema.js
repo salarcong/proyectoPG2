@@ -6,7 +6,7 @@ export const createTaskSchema = z.object({
     }),
     description: z.string({
         required_error: 'Description is required',
-    }).optional(),
+    }),
     date: z.string().datetime().optional(),
     
 })
