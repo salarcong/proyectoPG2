@@ -5,7 +5,7 @@ function App() {
     <BrowserRouter>
       <Routes> 
         <Route path="/" element={<h1>Home page</h1>} />
-        <Route path="/Login" element={<h1>Login</h1>} />
+        <Route path="/login" element={<h1>Login</h1>} />
         <Route path="/register" element={<h1>Register</h1>} />
         <Route path="/tasks" element={<h1>Tasks page</h1>} />
         <Route path="/add-task" element={<h1>New tasks</h1>} />
