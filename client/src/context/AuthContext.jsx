@@ -1,13 +1,20 @@
-import { createContext } from "react";
+import { createContext, useState } from "react";
 import { registerRequest } from '../api/auth.js';
 
 export const AuthContext = createContext();
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+}
 
 export const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
 
-    const singup = async (user) => {
+    const signup = async (user) => {
         const res = await registerRequest(values);
         console.log(res.data);
         setUser(res.data);
@@ -15,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
     return( 
     <AuthContext.Provider value={{
-        singup,
+        signup,
         user, 
     }}>
         {children}
