@@ -1,5 +1,5 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.js';
+import { AuthProvider } from './context/AuthContext.jsx';
 
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
@@ -7,7 +7,7 @@ import LoginPage from './pages/LoginPage';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter> 
         <Routes> 
           <Route path="/" element={<h1>Home page</h1>} />
           <Route path="/login" element={<LoginPage />} />
