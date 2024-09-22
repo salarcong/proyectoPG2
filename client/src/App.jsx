@@ -3,19 +3,28 @@ import { AuthProvider } from './context/AuthContext.jsx';
 
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
+import TaskFormPage from './pages/TaskFormPage.jsx';
+import TaskPage from './pages/TaskPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import HomePage from './pages/HomePage.jsx';
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter> 
+      <BrowserRouter>
+
+        <Routes>
+          <Route path="/login" element={<LoginPage />} /> 
+        </Routes>
+
         <Routes> 
-          <Route path="/" element={<h1>Home page</h1>} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<HomePage/>} />
+
           <Route path="/register" element={<RegisterPage/>} />
-          <Route path="/tasks" element={<h1>Tasks page</h1>} />
-          <Route path="/add-task" element={<h1>New tasks</h1>} />
-          <Route path="/tasks/:id" element={<h1>Update tasks</h1>} />
-          <Route path="/profile" element={<h1>Profile</h1>} />
+          <Route path="/tasks" element={<TaskPage/>} />
+          <Route path="/add-task" element={<TaskFormPage/>} />
+          <Route path="/tasks/:id" element={<TaskFormPage/>} />
+          <Route path="/profile" element={<ProfilePage/>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
