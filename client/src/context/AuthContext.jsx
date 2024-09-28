@@ -1,6 +1,6 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useInsertionEffect } from "react";
 import { registerRequest, loginRequest } from '../api/auth.js';
-import { set } from "mongoose";
+import Cookies from "js-cookie";
 
 export const AuthContext = createContext();
 
@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
             const res = await loginRequest(user);
             console.log(res);
             setIsAuthenticated(true);
+            setUser(res.data);
         } catch (error) {
             if (Array.isArray(error.response.data)) {
                 return setErrors(error.response.data);
@@ -57,6 +58,15 @@ export const AuthProvider = ({ children }) => {
         }
 
     }, [errors]);
+
+    useEffect(() => {
+        const cookie = Cookies.get();
+        console.log(cookie);
+
+        if (cookie.token) {
+            console.log(cookie.token);
+        }
+    }, []); 
 
     return( 
     <AuthContext.Provider 
