@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect, useInsertionEffect } from "react";
-import { registerRequest, loginRequest } from '../api/auth.js';
+import { registerRequest, loginRequest, verifyTokenRequest } from '../api/auth.js';
 import Cookies from "js-cookie";
 
 export const AuthContext = createContext();
@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [errors, setErrors] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const signup = async (user) => {
        try {
@@ -60,19 +61,44 @@ export const AuthProvider = ({ children }) => {
     }, [errors]);
 
     useEffect(() => {
-        const cookie = Cookies.get();
-        console.log(cookie);
+        async function checkLogin() {
+            const cookie = Cookies.get();
 
-        if (cookie.token) {
-            console.log(cookie.token);
-        }
-    }, []); 
+                if (!cookie.token) {
+                    setIsAuthenticated(false);
+                    setLoading(false);
+                    return setUser(null);
+
+                }
+                
+                    try {
+                        const res = await verifyTokenRequest(cookie.token)
+                        if (!res.status) {
+                            setIsAuthenticated(false);
+                            setLoading(false);
+                            return;  
+                        } 
+
+                        setIsAuthenticated(true);
+                        setUser(res.data);
+                        setLoading(false);
+
+                    } catch (error) {
+                        setIsAuthenticated(false);
+                        setUser(null);
+                        setLoading(false);
+                    }
+                }
+                checkLogin();
+            
+            }, []); 
 
     return( 
     <AuthContext.Provider 
         value={{
             signup,
             signin,
+            loading,
             user, 
             isAuthenticated,
             errors,
