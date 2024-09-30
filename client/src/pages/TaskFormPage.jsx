@@ -1,15 +1,43 @@
 import { useForm } from 'react-hook-form';
 import { useTasks } from '../context/TasksContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 
 function TaskFormPage() {
 
-  const {register, handleSubmit} = useForm();
-  const { createTask } = useTasks();
+  const {register, handleSubmit, setValue} = useForm();
+  const { createTask, getTask, updateTask } = useTasks();
   const navigate = useNavigate();
+  const params = useParams();
+
+  useEffect(() => {
+    async function loadTask(){
+      if (params.id) {
+        const task = await getTask(params.id);
+        console.log(task);
+        setValue('name', task.name);
+        setValue('description', task.description);
+        setValue('date', dayjs(task.date).utc().format('YYYY-MM-DD'));
+      }
+    }
+    loadTask();
+  }, []);
 
   const onSubmit = handleSubmit((data) => {
-    createTask(data);
+    const dataValid = {
+      ...data,
+      date: data.date ? dayjs.utc(data.date).format() : dayjs.utc().format(),
+    };
+
+    if (params.id) {
+      updateTask(params.id, dataValid);
+      } else {
+      createTask(dataValid);
+    }
     navigate('/tasks');
   });
 
@@ -19,16 +47,23 @@ function TaskFormPage() {
         
         <form onSubmit={onSubmit}>
 
+          {/*<label htmlFor='name'>Titulo</label>*/}
           <input type="text" placeholder="Titulo" 
             {...register('name')}
             className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md my-1'
             autoFocus
           />
-          <textarea rows="3" placeholder="Descripcion"
+          {/*<label htmlFor='description'>Descripción</label>*/}
+          <textarea rows="3" placeholder="Descripción"
             {...register('description')}
             className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md my-1'
           ></textarea>
-          <button> Guardar </button>
+          <label htmlFor='date'>Fecha</label>
+          <input type="date" {...register('date')}
+          className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md my-1'
+          />
+            
+          <button className='bg-indigo-500 px-3 py-2 rounded-md'> Guardar </button>
           
         </form>
 
