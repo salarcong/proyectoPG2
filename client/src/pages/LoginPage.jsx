@@ -1,5 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 function LoginPage() {
 
@@ -9,11 +11,18 @@ function LoginPage() {
     formState: {errors} 
   } = useForm();
 
-  const {signin, errors: signinErrors} = useAuth();
+  const {signin, errors: signinErrors, isAuthenticated} = useAuth();
+  const navigate = useNavigate();
 
   const onSubmit = handleSubmit((data) => {
     signin(data);
-  }); 
+  });
+  
+  useEffect(() => {
+
+    if(isAuthenticated) navigate('/tasks');
+
+  }, [isAuthenticated]);
 
   return (
     <div className='flex h-[calc(100vh-100px)] items-center justify-center'>
@@ -55,6 +64,13 @@ function LoginPage() {
         
         <button type="submit">login</button>
       </form>
+
+        {/*
+        <p>
+        No tienes una cuenta aun? <Link to='/register'>Registrate</Link>
+        </p>
+        */}
+
       </div>
     </div>
   );
