@@ -1,18 +1,43 @@
 import jwt from "jsonwebtoken";
 import { TOKEN_SECRET } from "../config.js";
 
-export const authRequired = (req, res, next) => {
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-    const {token} = req.cookies;
-    if (!token) return res.status(401).json({message: "No token, authorization denied"})
-    
-    jwt.verify(token, TOKEN_SECRET, (err, user) => {
-        
-        if (err) return res.status(401).json({message: "Invalid token"})
-        
-        req.user = user;
+const verifyToken = (req, res, next) => {
+  const token = req.headers['x-access-token'];
+  if (!token) {
+    return res.status(403).send('No token provided');
+  }
 
-        next()
+  jwt.verify(token, 'secret', (err, decoded) => {
+    if (err) {
+      return res.status(500).send('Failed to authenticate token');
+    }
+    req.userId = decoded.id;
+    req.userRoles = decoded.roles;
+    next();
+  });
+};
 
-    })
-}
+const isAdmin = (req, res, next) => {
+  if (req.userRoles.some(role => role.name === 'admin')) {
+    next();
+  } else {
+    res.status(403).send('Require Admin Role');
+  }
+};
+
+const isUser = (req, res, next) => {
+  if (req.userRoles.some(role => role.name === 'user')) {
+    next();
+  } else {
+    res.status(403).send('Require User Role');
+  }
+};
+
+module.exports = {
+  verifyToken,
+  isAdmin,
+  isUser
+};

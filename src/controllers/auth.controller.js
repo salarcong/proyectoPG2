@@ -4,68 +4,47 @@ import {createAccessToken} from "../libs/jwt.js";
 import jwt from "jsonwebtoken";
 import { TOKEN_SECRET } from "../config.js";
 
-export const register = async (req, res) => {
-
-    const {email, password, username} = req.body
-
-    try {
-
-        const userFound = await User.findOne({email})
-        if (userFound) 
-            return res.status(400).json(["EL email ya existe"])
-
-        const passwordHash = await bcrypt.hash(password, 10)
-    
-        const newUser = new User({
-            email,
-            username,
-            password : passwordHash,
-    })
-
-    const userSaved = await newUser.save()
-    const token = await createAccessToken({id: userSaved._id})
-
-    res.cookie("token", token);   
-    res.json({
-        _id: userSaved._id,
-        username: userSaved.username,
-        email: userSaved.email,
-        createdAt: userSaved.createdAt,
-        updatedAt: userSaved.updatedAt,
-        })
-    } catch (error) {
-        res.status(500).json({message: error.message})
+exports.register = async (req, res) => {
+    const { username, password, roles } = req.body;
+  
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      username,
+      password: hashedPassword,
+      roles: []
+    });
+  
+    if (roles) {
+      const foundRoles = await Role.find({ name: { $in: roles } });
+      user.roles = foundRoles.map(role => role._id);
+    } else {
+      const role = await Role.findOne({ name: 'user' });
+      user.roles = [role._id];
     }
-
-}
-
-export const login = async (req, res) => {
-
-    const {email, password} = req.body;
-
-    try {
-
-        const userFound = await User.findOne({email})
-        if (!userFound) return res.status(400).json({message: "El email no existe"})
-
-        const isMatch = await bcrypt.compare(password, userFound.password);
-        if (!isMatch) return res.status(400).json({message: "La contraseña no es correcta"}) 
-
-    const token = await createAccessToken({ id: userFound._id })
-
-    res.cookie("token", token);   
-    res.json({
-        _id: userFound._id,
-        username: userFound.username,
-        email: userFound.email,
-        createdAt: userFound.createdAt,
-        updatedAt: userFound.updatedAt,
-        })
-    } catch (error) {
-        res.status(500).json({message: error.message})
+  
+    await user.save();
+    res.status(201).send('User registered');
+  };
+  
+  exports.login = async (req, res) => {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username }).populate('roles');
+  
+    if (!user) {
+      return res.status(404).send('User not found');
     }
-
-}
+  
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).send('Invalid password');
+    }
+  
+    const token = jwt.sign({ id: user._id, roles: user.roles }, 'secret', {
+      expiresIn: 86400 // 24 hours
+    });
+  
+    res.status(200).send({ token });
+  };
 
 export const logout = async (req, res) => {
     res.cookie("token", "", {

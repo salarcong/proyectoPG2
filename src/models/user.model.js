@@ -16,8 +16,13 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
     },
+    role: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Role'
+    }
 }, {
     timestamps: true,
 });
 
 export default mongoose.model('User', userSchema)
+

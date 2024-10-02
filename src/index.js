@@ -1,9 +1,18 @@
-import app from './app.js'
-import {connectDB} from './db.js'
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const userRoutes = require('./routes/user.routes');
 
-/*se conecta a la base de datos*/
-connectDB();
+const app = express();
+app.use(bodyParser.json());
 
-/*se crea el puerto del servidor*/
-app.listen(3000)
-console.log('Server on port', 3000)
+mongoose.connect('mongodb://localhost:27017/yourdatabase', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+app.use('/api', userRoutes);
+
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
