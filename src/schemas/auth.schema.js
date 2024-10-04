@@ -3,7 +3,7 @@ import {z} from 'zod';
 
 export const registerSchema = z.object({
     username: z.string({
-        required_error	: 'Username is required',
+        required_error: 'Username is required',
     }),
     email: z.string({
         required_error: 'Email is required',
@@ -15,7 +15,8 @@ export const registerSchema = z.object({
     }).min(6, {
         message: 'La contraseña debe tener al menos 6 caracteres',
     }),
-})
+    role: z.enum(['user', 'admin']).default('user'), // Añadir el campo role con valor predeterminado 'user'
+});
 
 export const loginSchema = z.object({
     email: z.string({

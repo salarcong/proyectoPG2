@@ -1,6 +1,7 @@
-import { createContext, useState, useContext, useEffect, useInsertionEffect } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import { registerRequest, loginRequest, verifyTokenRequest } from '../api/auth.js';
 import Cookies from "js-cookie";
+import { useNavigate } from 'react-router-dom';
 
 export const AuthContext = createContext();
 
@@ -18,17 +19,15 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const signup = async (user) => {
        try {
-
         const res = await registerRequest(user);
         console.log(res.data);
         setUser(res.data);
         setIsAuthenticated(true);
-        
        } catch (error) {
-        
         console.log(error.response);
         setErrors(error.response.data);
        }
@@ -36,34 +35,41 @@ export const AuthProvider = ({ children }) => {
 
     const signin = async (user) => {
         try {
-            const res = await loginRequest(user);
-            console.log(res);
+          const res = await loginRequest(user);
+          if (res && res.data) {
             setIsAuthenticated(true);
             setUser(res.data);
-        } catch (error) {
-            if (Array.isArray(error.response.data)) {
-                return setErrors(error.response.data);
+            if (res.data.role === 'admin') {
+              navigate('/admin');
+            } else {
+              navigate('/tasks');
             }
-            console.log(error.response.data);
+          } else {
+            throw new Error('Invalid response from server');
+          }
+        } catch (error) {
+          console.log(error);
+          if (error.response && error.response.data) {
             setErrors([error.response.data.message]);
+          } else {
+            setErrors(['An unexpected error occurred']);
+          }
         }
-    }
+    };
 
     const logout = () => {
         Cookies.remove('token');
         setIsAuthenticated(false);
         setUser(null);
-    }
+    };
 
     useEffect(() => {
-
         if (errors.length > 0) {
             const timer = setTimeout(() => {
                 setErrors([]);
             }, 10000);
             return () => clearTimeout(timer);
         }
-
     }, [errors]);
 
     useEffect(() => {

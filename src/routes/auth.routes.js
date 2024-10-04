@@ -3,7 +3,8 @@ import {login,
         logout, 
         register,
         verifyToken, 
-        profile
+        profile,
+        uploadExcel
 } from "../controllers/auth.controller.js";
 
 import { authRequired } from "../middlewares/validateToken.js";
@@ -16,6 +17,7 @@ const router = Router();
 router.post("/register", validateSchema(registerSchema), register);
 router.post("/login", validateSchema(loginSchema), login); 
 router.post("/logout", logout);
+router.post('/upload-excel', uploadExcel); // Nueva ruta para subir datos desde el archivo Exce
 
 router.get("/verify", verifyToken);
 

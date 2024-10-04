@@ -11,7 +11,7 @@ function LoginPage() {
     formState: {errors} 
   } = useForm();
 
-  const {signin, errors: signinErrors, isAuthenticated} = useAuth();
+  const { signin, errors: signinErrors, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const onSubmit = handleSubmit((data) => {
@@ -19,10 +19,14 @@ function LoginPage() {
   });
   
   useEffect(() => {
-
-    if(isAuthenticated) navigate('/tasks');
-
-  }, [isAuthenticated]);
+    if (isAuthenticated) {
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/tasks');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   return (
     <div className='flex h-[calc(100vh-100px)] items-center justify-center'>
@@ -40,39 +44,34 @@ function LoginPage() {
 
       <form onSubmit={onSubmit}>
         
-        <input type="email" 
-            {... register('email', {required: true})} 
+        <input 
+            type="email" 
+            {...register('email', { required: true })} 
             className="w-full bg-zinc-700 text-white px-4 py-2 rounded-md my-2"
-        placeholder='Email'
+            placeholder='Email'
         />
         {
           errors.email && (
-          <p className='text-red-500'>email is required</p>
+          <p className='text-red-500'>Email is required</p>
           )
         }
         
-        <input type="password" 
-            {... register('password', {required: true})} 
+        <input 
+            type="password" 
+            {...register('password', { required: true })} 
             className="w-full bg-zinc-700 text-white px-4 py-2 rounded-md my-2"
-        placeholder='Password'
+            placeholder='Password'
         />
         {
           errors.password && (
-          <p className='text-red-500'>password is required</p>
+          <p className='text-red-500'>Password is required</p>
           )
         }   
         
-        <button type="submit">login</button>
+        <button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded-md my-2">Login</button>
       </form>
-
-        {/*
-        <p>
-        No tienes una cuenta aun? <Link to='/register'>Registrate</Link>
-        </p>
-        */}
-
-      </div>
     </div>
+  </div>
   );
 }
 
